@@ -177,7 +177,7 @@ class EncryptAdapter extends PassthroughAdapter
     /**
      * Decrypts a stream.
      *
-     * @param string $contents The stream to decrypt.
+     * @param resource $resource The stream to decrypt.
      *
      * @return resource|false The decrypted stream or false on failure.
      */
@@ -209,7 +209,7 @@ class EncryptAdapter extends PassthroughAdapter
     /**
      * Encrypts a stream.
      *
-     * @param string $contents The stream to encrypt.
+     * @param resource $resource The stream to encrypt.
      *
      * @return resource|false The encrypted stream or false on failure.
      */
