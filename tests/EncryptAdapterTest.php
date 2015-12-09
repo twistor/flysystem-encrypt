@@ -99,6 +99,7 @@ class EncryptAdapterTest  extends \PHPUnit_Framework_TestCase
     {
         $result = $this->adapter->readStream('test.png');
         $this->assertSame('file content', stream_get_contents($result['stream']));
+        fclose($result['stream']);
     }
 
     /**
@@ -128,6 +129,7 @@ class EncryptAdapterTest  extends \PHPUnit_Framework_TestCase
         // Test that the adapter gets the encrypted content.
         $mem = $this->memory->read('test.png');
         $this->assertSame('newfilecontent', $this->decrypt($mem['contents']));
+        fclose($stream);
     }
 
     /**
@@ -155,6 +157,7 @@ class EncryptAdapterTest  extends \PHPUnit_Framework_TestCase
         // Test that the adapter gets the encrypted content.
         $mem = $this->memory->read('test.png');
         $this->assertSame('newfilecontent', $this->decrypt($mem['contents']));
+        fclose($stream);
     }
 
     /**
