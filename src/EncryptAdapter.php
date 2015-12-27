@@ -2,7 +2,6 @@
 
 namespace Twistor\Flysystem;
 
-use Defuse\Crypto\Crypto;
 use Defuse\Crypto\File;
 use Defuse\Crypto\Key;
 use League\Flysystem\AdapterInterface;
