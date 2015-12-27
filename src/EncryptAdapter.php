@@ -20,9 +20,7 @@ class EncryptAdapter extends PassthroughAdapter
      * Constructs an EncryptAdapter object.
      *
      * @param \League\Flysystem\AdapterInterface $adapter The adapter to encrypt.
-     * @param string $key The encryption key.
-     *
-     * @throws \LogicException Thrown when the key is the wrong size.
+     * @param \Defuse\Crypto\Key $key The encryption key.
      */
     public function __construct(AdapterInterface $adapter, Key $key)
     {
@@ -33,11 +31,11 @@ class EncryptAdapter extends PassthroughAdapter
     /**
      * Provides key storage that won't leak during stack traces.
      *
-     * @param string The key. This can only be set once.
+     * @param \Defuse\Crypto\Key The key. This can only be set once.
      *
-     * @return string The encryption key.
+     * @return \Defuse\Crypto\Key The encryption key.
      */
-    private function key($key = null) {
+    private function key(Key $key = null) {
         static $key_storage = [];
 
         $object_id = spl_object_hash($this);
