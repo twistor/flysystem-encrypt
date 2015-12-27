@@ -1,12 +1,12 @@
 {
-    "name": "twistor/flysystem-encrypt-adapter",
+    "name": "twistor/flysystem-encrypt",
     "description": "Transparently encrypts/decrypts files for Flysystem.",
     "keywords": [
         "league"
     ],
     "type": "library",
     "license": "MIT",
-    "homepage": "https://github.com/twistor/flysystem-encrypt-adapter",
+    "homepage": "https://github.com/twistor/flysystem-encrypt",
     "authors": [
         {
             "name": "Chris Leppanen",
