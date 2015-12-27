@@ -2,6 +2,9 @@
 
 namespace Twistor\Flysystem;
 
+use Defuse\Crypto\Crypto;
+use Defuse\Crypto\File;
+use Defuse\Crypto\Key;
 use League\Flysystem\AdapterInterface;
 use League\Flysystem\Config;
 use League\Flysystem\Util;
@@ -21,12 +24,8 @@ class EncryptAdapter extends PassthroughAdapter
      *
      * @throws \LogicException Thrown when the key is the wrong size.
      */
-    public function __construct(AdapterInterface $adapter, $key)
+    public function __construct(AdapterInterface $adapter, Key $key)
     {
-        if (Util::contentSize($key) !== \Crypto::KEY_BYTE_SIZE) {
-            throw new \LogicException('The key is the wrong size.');
-        }
-
         $this->key($key);
         parent::__construct($adapter);
     }
@@ -133,9 +132,7 @@ class EncryptAdapter extends PassthroughAdapter
      */
     public function updateStream($path, $resource, Config $config)
     {
-        if (false === $resource = $this->encryptStream($resource)) {
-            return false;
-        }
+        $resource = $this->encryptStream($resource);
 
         return $this->getAdapter()->updateStream($path, $resource, $config);
     }
@@ -155,9 +152,7 @@ class EncryptAdapter extends PassthroughAdapter
      */
     public function writeStream($path, $resource, Config $config)
     {
-        if (false === $resource = $this->encryptStream($resource)) {
-            return false;
-        }
+        $resource = $this->encryptStream($resource);
 
         return $this->getAdapter()->writeStream($path, $resource, $config);
     }
@@ -171,7 +166,11 @@ class EncryptAdapter extends PassthroughAdapter
      */
     private function decryptString($contents)
     {
-        return \Crypto::Decrypt($contents, $this->key());
+        $resource = fopen('php://memory', 'r+b');
+        File::writeBytes($resource, $contents);
+        rewind($resource);
+
+        return stream_get_contents($this->decryptStream($resource));
     }
 
     /**
@@ -179,19 +178,16 @@ class EncryptAdapter extends PassthroughAdapter
      *
      * @param resource $resource The stream to decrypt.
      *
-     * @return resource|false The decrypted stream or false on failure.
+     * @return resource The decrypted stream.
      */
     private function decryptStream($resource)
     {
-        if (false === $contents = stream_get_contents($resource)) {
-            return false;
-        }
+        $out = fopen('php://memory', 'r+b');
 
-        $stream = fopen('php://memory', 'r+b');
-        fwrite($stream, $this->decryptString($contents));
-        rewind($stream);
+        File::decryptResource($resource, $out, $this->key());
+        rewind($out);
 
-        return $stream;
+        return $out;
     }
 
     /**
@@ -203,7 +199,11 @@ class EncryptAdapter extends PassthroughAdapter
      */
     private function encryptString($contents)
     {
-        return \Crypto::Encrypt($contents, $this->key());
+        $resource = fopen('php://memory', 'r+b');
+        File::writeBytes($resource, $contents);
+        rewind($resource);
+
+        return stream_get_contents($this->encryptStream($resource));
     }
 
     /**
@@ -211,18 +211,16 @@ class EncryptAdapter extends PassthroughAdapter
      *
      * @param resource $resource The stream to encrypt.
      *
-     * @return resource|false The encrypted stream or false on failure.
+     * @return resource The encrypted stream.
      */
     private function encryptStream($resource)
     {
-        if (false === $contents = stream_get_contents($resource)) {
-            return false;
-        }
 
-        $stream = fopen('php://memory', 'r+b');
-        fwrite($stream, $this->encryptString($contents));
-        rewind($stream);
+        $out = fopen('php://temp', 'r+b');
 
-        return $stream;
+        File::encryptResource($resource, $out, $this->key());
+        rewind($out);
+
+        return $out;
     }
 }

@@ -1,5 +1,8 @@
 <?php
 
+use Defuse\Crypto\Crypto;
+use Defuse\Crypto\File;
+use Defuse\Crypto\Key;
 use League\Flysystem\Config;
 use League\Flysystem\Memory\MemoryAdapter;
 use Twistor\Flysystem\EncryptAdapter;
@@ -35,7 +38,7 @@ class EncryptAdapterTest  extends \PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
-        $this->key = \Crypto::CreateNewRandomKey();
+        $this->key = Key::createNewRandomKey();
         $this->memory = new MemoryAdapter();
         $this->adapter = new EncryptAdapter($this->memory, $this->key);
         $this->adapter->write('test.png', 'file content', new Config());
@@ -44,13 +47,10 @@ class EncryptAdapterTest  extends \PHPUnit_Framework_TestCase
     /**
      * @covers ::__construct
      * @covers ::key
-     *
-     * @expectedException \LogicException
      */
     public function testConstruct()
     {
-        new EncryptAdapter(new MemoryAdapter(), \Crypto::CreateNewRandomKey());
-        new EncryptAdapter(new MemoryAdapter(), '123');
+        new EncryptAdapter(new MemoryAdapter(), Key::createNewRandomKey());
     }
 
     /**
@@ -169,7 +169,16 @@ class EncryptAdapterTest  extends \PHPUnit_Framework_TestCase
      */
     protected function decrypt($contents)
     {
-        return \Crypto::Decrypt($contents, $this->key);
+        $resource = fopen('php://memory', 'r+b');
+        File::writeBytes($resource, $contents);
+        rewind($resource);
+
+        $out = fopen('php://memory', 'r+b');
+
+        File::decryptResource($resource, $out, $this->key);
+        rewind($out);
+
+        return stream_get_contents($out);
     }
 
     /**
@@ -181,6 +190,15 @@ class EncryptAdapterTest  extends \PHPUnit_Framework_TestCase
      */
     protected function encrypt($contents)
     {
-        return \Crypto::Encrypt($contents, $this->key);
+        $resource = fopen('php://memory', 'r+b');
+        File::writeBytes($resource, $contents);
+        rewind($resource);
+
+        $out = fopen('php://memory', 'r+b');
+
+        File::encryptResource($resource, $out, $this->key);
+        rewind($out);
+
+        return stream_get_contents($out);
     }
 }
