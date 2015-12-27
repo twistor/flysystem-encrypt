@@ -104,6 +104,7 @@ class EncryptAdapterTest  extends \PHPUnit_Framework_TestCase
     /**
      * @covers ::update
      * @covers ::encryptString
+     * @covers ::getStreamFromString
      */
     public function testUpdate()
     {
@@ -133,6 +134,8 @@ class EncryptAdapterTest  extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers ::write
+     * @covers ::encryptString
+     * @covers ::getStreamFromString
      */
     public function testWrite()
     {

@@ -163,9 +163,7 @@ class EncryptAdapter extends PassthroughAdapter
      */
     private function decryptString($contents)
     {
-        $resource = fopen('php://memory', 'r+b');
-        File::writeBytes($resource, $contents);
-        rewind($resource);
+        $resource = $this->getStreamFromString($contents);
 
         return stream_get_contents($this->decryptStream($resource));
     }
@@ -196,9 +194,7 @@ class EncryptAdapter extends PassthroughAdapter
      */
     private function encryptString($contents)
     {
-        $resource = fopen('php://memory', 'r+b');
-        File::writeBytes($resource, $contents);
-        rewind($resource);
+        $resource = $this->getStreamFromString($contents);
 
         return stream_get_contents($this->encryptStream($resource));
     }
@@ -219,5 +215,21 @@ class EncryptAdapter extends PassthroughAdapter
         rewind($out);
 
         return $out;
+    }
+
+    /**
+     * Returns a stream representation of a string.
+     *
+     * @param string $contents The string
+     *
+     * @return resource The stream with the string contents.
+     */
+    private function getStreamFromString($contents)
+    {
+        $resource = fopen('php://memory', 'r+b');
+        File::writeBytes($resource, $contents);
+        rewind($resource);
+
+        return $resource;
     }
 }
